@@ -21,7 +21,7 @@ local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
 local get_plugin_path = function()
 	local current_file = debug.getinfo(1).source:sub(2)
-	return current_file:match("(.*/)") .. "/../../"
+	return current_file:match("(.*/)") .. "../../"
 end
 
 local system_execute = function(command)
@@ -44,6 +44,7 @@ function C.setup()
 		extension = {
 			cfm = "cfml",
 			cfc = "cfml",
+			cfs = "cfml",
 		},
 	})
 

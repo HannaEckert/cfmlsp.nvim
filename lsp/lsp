@@ -48,8 +48,8 @@ waitForLspStart() {
     local elapsed=0
 
     while (( $(echo "$elapsed < 3" | bc -l) )); do
-		local port=$(cat $currentDirectory/lsp.log | grep port | tail -n 1 | sed 's/.*port \(.*\).*/\1/')
-		local started=$(cat $currentDirectory/lsp.log | grep "LSPStart")
+		local port=$(cat "$currentDirectory/lsp.log" | grep port | tail -n 1 | sed 's/.*port \(.*\).*/\1/')
+		local started=$(cat "$currentDirectory/lsp.log" | grep "LSPStart")
 
 		if [[ -n "$started" && -n "$port" ]] ; then
 			echo $port
@@ -63,7 +63,7 @@ waitForLspStart() {
 
 port=$(waitForLspStart)
 if [ ! -n "$port" ] ; then
-	echo "Language server didn't start. Please check $currentDirectory/lsp.log for more info." >/dev/stderr
+	echo "Language server didn't start. Please check '$currentDirectory/lsp.log' for more info." >/dev/stderr
 	kill -9 $lspProcessId
 	exit 1
 fi
