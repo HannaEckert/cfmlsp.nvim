@@ -55,4 +55,4 @@ unzip -o -j "$extensionFile" $libs -d "$targetLibFolder" 1>/dev/null 2>/dev/null
 rm "$extensionFile" 
 
 echo "$latestVersion" > "$currentVersionInfoFile"
-echo "Updated cfml builder $latestVersion"
+echo "Updated cfml builder: $latestVersion"

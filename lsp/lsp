@@ -19,7 +19,7 @@ if (( $JAVA_VERSION < $MIN_JAVA_VERSION )) ; then
 	exit 1
 fi
 
-$currentDirectory/update_libs.sh
+"$currentDirectory/update_libs.sh"
 
 # If a port is given, use that one
 if [[ -n "$1" && "$1" =~ ^[1-9][0-9]*$ ]]; then
