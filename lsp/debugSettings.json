@@ -1,0 +1,14 @@
+{
+	"server": {
+		"host": "127.0.0.1",
+		"enableSSL": "false",
+		"RDSUsername": "",
+		"RDSPassword": "00000000000000000000",
+		"type": "remote",
+		"virtualDatas": {
+			"virtualHostId": "coldfusion",
+			"serverId": "coldfusion"
+		}
+	},
+	"debugPort": "5005"
+}

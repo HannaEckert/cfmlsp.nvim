@@ -1,0 +1,72 @@
+#!/usr/bin/bash
+
+currentDirectory=$(cd $(dirname "$0") >/dev/null 2>&1; pwd -P)
+
+MIN_JAVA_VERSION=17
+JAVA_VERSION=$(java -version 2>&1 | sed -n ';s/.* version "\(.*\)\..*\..*".*/\1/p;')
+DEFAULT_PORT=9823
+
+# check if netcat is installed
+if ! command -v nc >/dev/null ; then
+	echo "Netcat (nc) needs to be installed to connect to the language server."
+	exit 1
+fi
+
+# Check the java version
+if (( $JAVA_VERSION < $MIN_JAVA_VERSION )) ; then
+	echo "This language server needs at least java v$MIN_JAVA_VERSION running." >/dev/stderr
+	echo "Installed java version: $JAVA_VERSION" >/dev/stderr
+	exit 1
+fi
+
+$currentDirectory/update_libs.sh
+
+# If a port is given, use that one
+if [[ -n "$1" && "$1" =~ ^[1-9][0-9]*$ ]]; then
+	port=$1
+fi
+
+classpath=""
+libs="$currentDirectory/lib"
+
+for jarFile in $(ls $libs); do
+	if [ "$classpath" != "" ] ; then
+		classpath="$classpath:"	
+	fi
+
+	classpath="$classpath$libs/$jarFile"
+done
+
+set +m
+java -classpath "$classpath" com.adobe.coldfusion.ls.Main $port >"$currentDirectory/lsp.log" 2>&1 &
+lspProcessId=$!
+set -m
+
+# Wait up to 3 seconds for the server to open a port
+waitForLspStart() {
+    local interval=0.2
+    local elapsed=0
+
+    while (( $(echo "$elapsed < 3" | bc -l) )); do
+		local port=$(cat $currentDirectory/lsp.log | grep port | tail -n 1 | sed 's/.*port \(.*\).*/\1/')
+		local started=$(cat $currentDirectory/lsp.log | grep "LSPStart")
+
+		if [[ -n "$started" && -n "$port" ]] ; then
+			echo $port
+			return
+		fi
+
+		sleep $interval
+        elapsed=$(echo "$elapsed + $interval" | bc)
+    done
+}
+
+port=$(waitForLspStart)
+if [ ! -n "$port" ] ; then
+	echo "Language server didn't start. Please check $currentDirectory/lsp.log for more info." >/dev/stderr
+	kill -9 $lspProcessId
+	exit 1
+fi
+
+# Turning the lsp server into a cli tool
+nc localhost $port
